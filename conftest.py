@@ -1,24 +1,15 @@
 """
 Фикстура для проекта
 """
-
 import pytest
-
 from selenium import webdriver
-
 from selenium.webdriver.chrome.service import Service
-
 from selenium.webdriver.chrome.options import Options
-
 from selenium.webdriver.firefox.service import Service as FFService
-
 from selenium.webdriver.firefox.options import Options as FFOptions
 
 
 def pytest_addoption(parser):
-    """
-    В функции задаются аргументы командной строки pytest.
-    """
     parser.addoption("--browser", default="ch", choices=["ya", "ch", "ff"])
     parser.addoption("--headless", action="store_true")
     parser.addoption("--yadriver", action="store_true",

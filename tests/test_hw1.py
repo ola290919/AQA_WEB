@@ -1,13 +1,9 @@
 """
 Тесты проверки наличия элементов и покрытия  сценариев opencart
 """
-
 import random
-
 import pytest
-
 from selenium.webdriver.common.by import By
-
 from helpers import find_visible_element, check_page_title
 
 
@@ -15,8 +11,7 @@ def test_find_elements_on_homepage(browser):
     """
     Тесты проверки элементарного наличия элементов на Главной странице
     """
-    driver = browser[0]
-    base_url = browser[1]
+    driver, base_url = browser
     driver.get(base_url)
     find_visible_element('//*[@id ="search"]/button', driver)
     find_visible_element('//*[@id ="search"]', driver)
@@ -31,8 +26,7 @@ def test_find_elements_on_administration_page(browser):
     """
     Тесты проверки элементарного наличия элементов на странице логина в админку /administration
     """
-    driver = browser[0]
-    base_url = browser[1]
+    driver, base_url = browser
     driver.get(f'{base_url}/administration/')
     find_visible_element('//*[@id="form-login"]/div/button', driver)
     find_visible_element('//*[@id="input-username"]', driver)
@@ -47,8 +41,7 @@ def test_find_elements_on_registration_page(browser):
     Тесты проверки элементарного наличия элементов на
     странице регистрации пользователя (/index.php?route=account/register)
     """
-    driver = browser[0]
-    base_url = browser[1]
+    driver, base_url = browser
     driver.get(f'{base_url}/index.php?route=account/register')
     find_visible_element(
         f'//*[@id="column-right"]//*[@href="{base_url}/en-gb?route=account/address"]', driver)
@@ -64,8 +57,7 @@ def test_find_elements_on_prodact_page(browser):
     Тесты проверки элементарного наличия элементов на
     странице карточки товара (/en-gb/product/iphone)
     """
-    driver = browser[0]
-    base_url = browser[1]
+    driver, base_url = browser
     driver.get(f'{base_url}/en-gb/product/iphone')
     find_visible_element('//*[@id="tab-description"]/p', driver)
     find_visible_element('//*[@id="form-product"]/div/button', driver)
@@ -82,8 +74,7 @@ def test_find_elements_on_catalog_page(browser):
     Тесты проверки элементарного наличия элементов на
     странице каталога (/en-gb/catalog/smartphone)
     """
-    driver = browser[0]
-    base_url = browser[1]
+    driver, base_url = browser
     driver.get(f'{base_url}/en-gb/catalog/smartphone')
     find_visible_element('//*[@id="input-limit"]', driver)
     find_visible_element(f'//*[@id="column-left"]'
@@ -98,8 +89,7 @@ def test_find_elements_on_product_page(browser):
     Тесты проверки элементарного наличия элементов на
     странице карточки товара (/en-gb/product/smartphone/htc-touch-hd)
     """
-    driver = browser[0]
-    base_url = browser[1]
+    driver, base_url = browser
     driver.get(f'{base_url}/en-gb/product/smartphone/htc-touch-hd')
     find_visible_element('//*[@id="content"]//*[@href="#tab-review"]', driver)
     find_visible_element(f'//*[@class="list-unstyled"]'
@@ -115,8 +105,7 @@ def test_login_logout_admin(browser):
     """
     Тест покрытия сценария логина-разлогина в админку с проверкой, что логин был выполнен
     """
-    driver = browser[0]
-    base_url = browser[1]
+    driver, base_url = browser
     driver.get(f'{base_url}/administration')
     driver.find_element(By.ID, 'input-username').send_keys('user')
     driver.find_element(By.ID, 'input-password').send_keys('bitnami')
@@ -132,8 +121,7 @@ def test_random_product(browser):
     Тест покрытия сценария добавления в корзину случайного товара с главной страницы
     и проверки, что он появился в корзине
     """
-    driver = browser[0]
-    base_url = browser[1]
+    driver, base_url = browser
     driver.get(base_url)
     products = driver.find_elements(
         By.XPATH,
@@ -152,8 +140,7 @@ def test_switching_currencies(browser, url_end):
     """
     Тест покрытия сценария, что переключении валют цены на товары меняются на главной и в каталоге
     """
-    driver = browser[0]
-    base_url = browser[1]
+    driver, base_url = browser
     driver.get(f'{base_url}{url_end}')
     driver.find_element(By.XPATH, '//*[@class="list-inline"]'
                                   '//i[@class="fa-solid fa-caret-down"]').click()
