@@ -1,29 +1,21 @@
 """
 Вспомогательные функции для тестов
 """
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+import random
+import string
 
 
-def find_visible_element(locator, driver, timeout=1, by=By.XPATH):
-    """
-    Функция поиска по XPATH элемента, который видим в dom и на странице
-    """
-    try:
-        # WebDriverWait(driver, timeout).until(EC.title_is((title)))
-        WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((by, locator)))
-    except TimeoutException:
-        driver.save_screenshot(f"screenshots/{driver.session_id}.png")
-        raise AssertionError(f"Не дождались видимости элемента: {locator} за {timeout} секунд")
+def random_string(lenght=10):
+    return "".join([random.choice(string.ascii_letters) for _ in range(lenght)])
 
-def check_page_title(title, driver, timeout=1):
-    """
-    Функция проверки титула страницы
-    """
-    try:
-        t = WebDriverWait(driver, timeout).until(EC.title_is(title))
-    except TimeoutException:
-        driver.save_screenshot(f"screenshots/{driver.session_id}.png")
-        raise AssertionError(f"Титул страницы {t} вместо {title}")
+
+def get_pages_list():
+    return ['', 'en-gb/catalog/mp3-players', 'en-gb/catalog/cameras',
+            'en-gb/catalog/smartphone', 'en-gb/catalog/software',
+            'en-gb/catalog/tablet', 'en-gb/catalog/component',
+            'en-gb/catalog/laptop-notebook', 'en-gb/catalog/desktops']
+
+
+def random_email():
+    return (random_string() + "@" + random_string(3)
+            + "." + random.choice(["com", "pro", "org", "ru"]))
