@@ -10,7 +10,7 @@ def random_string(lenght=10):
 
 
 def get_pages_list():
-    return ['', 'en-gb/catalog/mp3-players', 'en-gb/catalog/cameras',
+    return ['home', 'en-gb/catalog/mp3-players', 'en-gb/catalog/cameras',
             'en-gb/catalog/smartphone', 'en-gb/catalog/software',
             'en-gb/catalog/tablet', 'en-gb/catalog/component',
             'en-gb/catalog/laptop-notebook', 'en-gb/catalog/desktops']

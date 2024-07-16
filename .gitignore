@@ -164,3 +164,5 @@ cython_debug/
 /web_venv/pyvenv.cfg
 /main.py
 /opencart_demo/
+/allure-report/
+/allure-results/
