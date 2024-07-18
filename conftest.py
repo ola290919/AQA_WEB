@@ -1,25 +1,30 @@
 """
 Фикстура для проекта
 """
+import os
+import random
+import time
 import datetime
 import logging
 import pytest
 import allure
+import requests
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.firefox.service import Service as FFService
 from selenium.webdriver.firefox.options import Options as FFOptions
+from selenium.webdriver.edge.options import Options as EdOptions
 
 
 def pytest_addoption(parser):
-    parser.addoption("--browser", default="ch", choices=["ya", "ch", "ff"])
+    parser.addoption("--browser", action="store", default="chrome", choices=["chrome", "firefox"])
     parser.addoption("--headless", action="store_true")
-    parser.addoption("--yadriver", action="store_true",
-                     default='C:/Users/mx/Downloads/'
-                             'yandexdriver-24.6.0.1874-win64/yandexdriver.exe')
     parser.addoption("--url", default='http://10.0.1.11:8081')
     parser.addoption("--log_level", action="store", default="INFO")
+    parser.addoption("--executor", action="store", default="127.0.0.1")
+    parser.addoption("--mobile", action="store_true")
+    parser.addoption("--vnc", action="store_true")
+    parser.addoption("--logs", action="store_true")
+    parser.addoption("--bv")
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -41,9 +46,14 @@ def browser(request):
     """
     browser_name = request.config.getoption("--browser")
     headless_mode = request.config.getoption("--headless")
-    yadriver = request.config.getoption("--yadriver")
     base_url = request.config.getoption("--url")
     log_level = request.config.getoption("--log_level")
+    executor = request.config.getoption("--executor")
+    executor_url = f'http://{executor}:4444/wd/hub'
+    vnc = request.config.getoption("--vnc")
+    version = request.config.getoption("--bv")
+    logs = request.config.getoption("--logs")
+    mobile = request.config.getoption("--mobile")
 
     logger = logging.getLogger(request.node.name)
     filename = (f"logs/{request.node.name}.log").replace('/', '_')
@@ -54,25 +64,35 @@ def browser(request):
 
     logger.info("===> Test %s started at %s" % (request.node.name, datetime.datetime.now()))
 
-    if browser_name == "ya":
+    if browser_name == "chrome":
         options = Options()
         if headless_mode:
             options.add_argument("headless=new")
-        service = Service(executable_path=yadriver)
-        driver = webdriver.Chrome(service=service, options=options)
-    elif browser_name == "ch":
-        options = Options()
-        if headless_mode:
-            options.add_argument("headless=new")
-        driver = webdriver.Chrome(service=Service(), options=options)
-    elif browser_name == "ff":
+    elif browser_name == "firefox":
         options = FFOptions()
         if headless_mode:
             options.add_argument("--headless")
-        driver = webdriver.Firefox(service=FFService(), options=options)
     else:
         raise ValueError(f"Browser {browser_name} not supported")
-    driver.set_window_size(1920, 1080)
+
+    caps = {
+        "browserName": browser_name,
+        "browserVersion": version,
+        "selenoid:options": {
+            "enableVNC": vnc,
+            "name": request.node.name,
+            "enableLog": logs
+        },
+        "acceptInsecureCerts": True
+    }
+
+    for k, v in caps.items():
+        options.set_capability(k, v)
+
+    driver = webdriver.Remote(command_executor=executor_url, options=options)
+
+    if not mobile:
+        driver.set_window_size(1920, 1080)
 
     driver.logger = logger
 
