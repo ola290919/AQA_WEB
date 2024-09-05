@@ -12,19 +12,23 @@ import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.firefox.options import Options as FFOptions
-from selenium.webdriver.edge.options import Options as EdOptions
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.firefox.service import Service as FFService
 
 
 def pytest_addoption(parser):
+    parser.addoption("--launch_mode", default="remote", choices=["remote", "local"])
+    parser.addoption("--browser_loc", default="ch", choices=["ch", "ya", "ff"])
+    parser.addoption("--yadriver", action="store_true", default='C:/Users/mx/Downloads/'
+                             'yandexdriver-24.6.0.1874-win64/yandexdriver.exe')
     parser.addoption("--browser", action="store", default="chrome", choices=["chrome", "firefox"])
     parser.addoption("--headless", action="store_true")
-    parser.addoption("--url", default='http://10.0.1.11:8081')
+    parser.addoption("--url", default='http://10.0.1.17:8081')
     parser.addoption("--log_level", action="store", default="INFO")
     parser.addoption("--executor", action="store", default="127.0.0.1")
-    parser.addoption("--mobile", action="store_true")
     parser.addoption("--vnc", action="store_true")
     parser.addoption("--logs", action="store_true")
-    parser.addoption("--bv")
+    parser.addoption("--bv", action="store", default="latest")
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -44,7 +48,10 @@ def browser(request):
     а также режим headless и путь к yandexdriver.exe для запуска yandex браузера.
     Возвращает драйвер и базовый url.
     """
+    launch_mode = request.config.getoption("--launch_mode")
+    browser_loc = request.config.getoption("--browser_loc")
     browser_name = request.config.getoption("--browser")
+    yadriver = request.config.getoption("--yadriver")
     headless_mode = request.config.getoption("--headless")
     base_url = request.config.getoption("--url")
     log_level = request.config.getoption("--log_level")
@@ -53,7 +60,6 @@ def browser(request):
     vnc = request.config.getoption("--vnc")
     version = request.config.getoption("--bv")
     logs = request.config.getoption("--logs")
-    mobile = request.config.getoption("--mobile")
 
     logger = logging.getLogger(request.node.name)
     filename = (f"logs/{request.node.name}.log").replace('/', '_')
@@ -66,33 +72,44 @@ def browser(request):
 
     if browser_name == "chrome":
         options = Options()
-        if headless_mode:
-            options.add_argument("headless=new")
     elif browser_name == "firefox":
         options = FFOptions()
-        if headless_mode:
-            options.add_argument("--headless")
-    else:
-        raise ValueError(f"Browser {browser_name} not supported")
 
     caps = {
         "browserName": browser_name,
         "browserVersion": version,
-        "selenoid:options": {
-            "enableVNC": vnc,
-            "name": request.node.name,
-            "enableLog": logs
-        },
-        "acceptInsecureCerts": True
+        # "selenoid:options": {
+        #     "enableVNC": vnc,
+            # "name": request.node.name
+        # },
+        # "acceptInsecureCerts": True
     }
 
     for k, v in caps.items():
         options.set_capability(k, v)
 
-    driver = webdriver.Remote(command_executor=executor_url, options=options)
+    if launch_mode == 'remote':
+        driver = webdriver.Remote(command_executor=executor_url, options=options)
 
-    if not mobile:
-        driver.set_window_size(1920, 1080)
+    elif launch_mode == "local":
+        if browser_loc == "ya":
+            options = Options()
+            if headless_mode:
+                options.add_argument("headless=new")
+            service = Service(executable_path=yadriver)
+            driver = webdriver.Chrome(service=Service(), options=options)
+        elif browser_loc == "ch":
+            options = Options()
+            if headless_mode:
+                options.add_argument("headless=new")
+            driver = webdriver.Chrome(service=Service(), options=options)
+        elif browser_loc == "firefox":
+            options = FFOptions()
+            if headless_mode:
+                options.add_argument("--headless")
+            driver = webdriver.Firefox(service=FFService(), options=options)
+
+    driver.set_window_size(1920, 1080) #local
 
     driver.logger = logger
 
