@@ -19,8 +19,7 @@ from selenium.webdriver.firefox.service import Service as FFService
 def pytest_addoption(parser):
     parser.addoption("--launch_mode", default="remote", choices=["remote", "local"])
     parser.addoption("--browser_loc", default="ch", choices=["ch", "ya", "ff"])
-    parser.addoption("--yadriver", action="store_true", default='C:/Users/mx/Downloads/'
-                             'yandexdriver-24.6.0.1874-win64/yandexdriver.exe')
+    parser.addoption("--yadriver", action="store_true", default='C:/Users/mx/Downloads/yandexdriver-24.7.0.2299-win64/yandexdriver.exe')
     parser.addoption("--browser", action="store", default="chrome", choices=["chrome", "firefox"])
     parser.addoption("--headless", action="store_true")
     parser.addoption("--url", default='http://10.0.1.17:8081')
@@ -28,7 +27,7 @@ def pytest_addoption(parser):
     parser.addoption("--executor", action="store", default="127.0.0.1")
     parser.addoption("--vnc", action="store_true")
     parser.addoption("--logs", action="store_true")
-    parser.addoption("--bv", action="store", default="latest")
+    parser.addoption("--bv", action="store")
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -71,25 +70,24 @@ def browser(request):
     logger.info("===> Test %s started at %s" % (request.node.name, datetime.datetime.now()))
 
     if browser_name == "chrome":
-        options = Options()
+        options_rem = Options()
     elif browser_name == "firefox":
-        options = FFOptions()
+        options_rem = FFOptions()
 
     caps = {
         "browserName": browser_name,
         "browserVersion": version,
-        # "selenoid:options": {
-        #     "enableVNC": vnc,
-            # "name": request.node.name
-        # },
-        # "acceptInsecureCerts": True
+        "selenoid:options": {
+            "enableVNC": vnc,
+            "name": request.node.name
+        }
     }
 
     for k, v in caps.items():
-        options.set_capability(k, v)
+        options_rem.set_capability(k, v)
 
     if launch_mode == 'remote':
-        driver = webdriver.Remote(command_executor=executor_url, options=options)
+        driver = webdriver.Remote(command_executor=executor_url, options=options_rem)
 
     elif launch_mode == "local":
         if browser_loc == "ya":
@@ -97,13 +95,13 @@ def browser(request):
             if headless_mode:
                 options.add_argument("headless=new")
             service = Service(executable_path=yadriver)
-            driver = webdriver.Chrome(service=Service(), options=options)
+            driver = webdriver.Chrome(service=service, options=options)
         elif browser_loc == "ch":
             options = Options()
             if headless_mode:
                 options.add_argument("headless=new")
             driver = webdriver.Chrome(service=Service(), options=options)
-        elif browser_loc == "firefox":
+        elif browser_loc == "ff":
             options = FFOptions()
             if headless_mode:
                 options.add_argument("--headless")
