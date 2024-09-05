@@ -1,26 +1,40 @@
 # OTUS_AQA
+запуск локально (default):
 
+`pytest  --launch_mode local` 
 
-PS C:\Users\mx\Downloads\drivers> .\cm_windows_amd64 selenoid status
+запуск удаленно (default):
 
-docker run --rm -it --privileged selenoid/chrome:latest
+`pytest`
 
+запуск через docker (default):
 
-при запуске контейнера с тестами указать опцию --network=selenoid --launch_mode=remote
+`docker run -it --rm --network selenoid --name myapp  tests:0.2 --executor 172.19.0.3 tests`
 
-docker  inspect selenoid   посмотреть в какой сети запущен selenoid и какой IP адрес ему назначен
+запуск через docker (firefox):
+
+`docker run -it --rm --network selenoid --name myapp  tests:0.2 --executor 172.19.0.3 --browser firefox tests`
 
 при запуске в несколько потоков -n 2
 
+
+PS C:\Users\mx\Downloads\drivers> .\cm_windows_amd64 selenoid status/start
+
+скачать браузер:
+
+docker run --rm -it --privileged selenoid/chrome:127.0
+
+
 # Dockerfile
 
-docker build -t tests:0.2 . 
+собрать: docker build -t tests:0.2 . 
 
-docker run -it --rm --name myapp tests:0.2 --headless --browser firefox
+запустить: docker run -it --rm --name myapp tests:0.2 --headless --browser firefox
 
-docker stop
+остановить: docker stop
 
 docker ps - информация o Containers
+
 docker images - информация o Images
 
 docker system df  - информация обо всех объектах Images Containers Local_Volumes Build Cache
