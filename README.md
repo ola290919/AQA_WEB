@@ -1,4 +1,13 @@
-# OTUS_AQA
+# OTUS_AQA Docker compose
+
+
+поменять порт по-умолчанию для контейнера selenoid-ui, запустить контейнер следующей командой:
+
+`docker run -d --name selenoid-ui --network selenoid -p 8090:8080 aerokube/selenoid-ui:1.10.11 --selenoid-uri http://selenoid:4444`
+
+
+# OTUS_AQA Dockerfile
+
 запуск локально (default):
 
 `pytest  --launch_mode local` 
@@ -59,5 +68,6 @@ docker images - показать все сборки
 docker system prune -a - удалить все образы
 
 docker volume prune -a  - очистить кеш
+
 
 
